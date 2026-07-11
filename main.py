@@ -19,14 +19,13 @@ def format_review(review: str):
     return review
 
 
-def star_maker(rating):
+def star_maker(rating: float):
     rating = float(rating)
     star = "★"
     half = "½"
 
     if not rating.is_integer():
         rating -= 0.5
-
         result = star * int(rating)
         return f"[yellow bold]{result}{half}[/]"
     else:
@@ -41,6 +40,7 @@ def fetch(username: str, page: int = 1, amount_per_page: int = 5):
     except KeyError:
         raise HTTPException(status_code=500, detail="something bad might happen :(")
 
+    all_reviews = []
     for activity in activities:
         (
             link,
@@ -53,13 +53,13 @@ def fetch(username: str, page: int = 1, amount_per_page: int = 5):
             tmdb_movieid,
             review,
         ) = activity.values()
-        return PlainTextResponse(
-            boxen(
-                f"{format_review(review)}",
-                title=f"{film_title} - {star_maker(member_rating)} {'[red bold]:heart:[/]' if member_like else ''}",
-                # subtitle="Cool subtitle goes here",
-                # subtitle_alignment="center",
-                color="#eeeeee",
-                padding=(0, 1), # type: ignore
-            )
+
+        review_box = boxen(
+            f"{format_review(review)}",
+            title=f"{film_title} - {star_maker(member_rating)} {'[red bold]:heart:[/]' if member_like else ''}",
+            color="#eeeeee",
+            padding=(0, 1),  # type: ignore
         )
+        all_reviews.append(review_box)
+
+    return PlainTextResponse("\n\n".join(all_reviews))
